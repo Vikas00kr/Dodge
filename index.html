@@ -1,0 +1,114 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>Phaser - Making your first game, part 9</title>
+	<script type="text/javascript" src="src/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+            background:#ccc;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(360, 640, Phaser.AUTO, '', { preload: preload, create: create, update: update ,render: render});
+
+function preload() {
+    
+    game.stage.backgroundColor = '#000';
+
+    game.load.image('bg', 'assets/back.png');
+    game.load.image('player', 'assets/player.png');
+    game.load.image('dude', 'assets/dude.png');
+    game.load.image('ground', 'assets/ground.png');
+
+}
+
+var player;
+var sprites;
+var enemy;
+var dude;    
+var cursors;
+var fallTimer=150;
+var ground;    
+    
+function create() {
+   ;
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+    var bg = game.add.sprite(0,0,"bg");
+    
+    //Player
+    player = game.add.sprite(game.world.centerX, game.world.height-100, 'player');
+    player.scale.setTo(0.8);
+    player.anchor.setTo(0.5);
+    game.physics.arcade.enable(player);
+    player.body.bounce.y = 0.2;
+    player.body.gravity.y = 500;
+    player.body.collideWorldBounds = true;
+    player.animations.add('left', [0, 1, 2, 3], 10, true);
+    player.animations.add('right', [5, 6, 7, 8], 10, true);
+    
+    ground = game.add.sprite(0,game.world.height-50,'ground');
+    game.physics.arcade.enable(ground);
+    ground.body.immovable=true;
+    
+    enemy = game.add.physicsGroup(Phaser.Physics.ARCADE);
+    game.time.events.loop(Phaser.Timer.SECOND, createEnemy, this, enemy);
+ 
+    
+    cursors = game.input.keyboard.createCursorKeys(); 
+
+  
+}
+    
+function createEnemy(e){
+    //enemy.enableBody = true;
+    dude = e.create(game.rnd.integerInRange(0+25,game.world.width-25), 0, 'dude');
+    dude.scale.setTo(0.8);
+    dude.anchor.setTo(0.5);
+    dude.body.gravity.y = 500;
+    dude.body.collideWorldBounds = true;
+    
+}
+
+
+function update() {
+   // 
+//    game.physics.arcade.overlap(player, crows , killPlayer, null, this); 
+
+game.physics.arcade.collide(player, ground);
+game.physics.arcade.collide(enemy);    
+game.physics.arcade.collide(enemy, ground);
+game.physics.arcade.collide(player, enemy);    
+    
+
+    
+player.body.velocity.x=0;    
+if (cursors.left.isDown) {
+    player.body.velocity.x=-150;
+}
+else if (cursors.right.isDown) {
+    player.body.velocity.x=+150;
+}
+if (cursors.up.isDown && player.body.touching.down) {
+    player.body.velocity.y=-300;
+}    
+}
+    
+   
+function render() {
+    enemy.forEachAlive(function(d) {    game.debug.body(d);  }, this);
+   // game.debug.body(ground,'#0fffff');
+   // game.debug.body(enemy,'#0fffff');
+    //game.debug.body(player,'#0fffff');
+
+}  
+
+</script>
+
+</body>
+</html>
